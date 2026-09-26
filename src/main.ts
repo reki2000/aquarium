@@ -15,6 +15,7 @@ const params = new URLSearchParams(location.search);
 const tier = (params.get('quality') as QualityTier) ?? 'high';
 const quality = QUALITY[tier] ?? QUALITY.high;
 const status = document.getElementById('status')!;
+const frozen = params.has('freeze');
 
 async function main() {
   const renderer = new THREE.WebGPURenderer({ antialias: false, forceWebGL: params.get('backend') === 'webgl' });
@@ -107,7 +108,8 @@ async function main() {
   renderer.setAnimationLoop((timestamp) => {
     clock.update(timestamp);
     const dt = Math.min(clock.getDelta(), 1 / 20);
-    colony.update(dt);
+    // ?freeze keeps the shrimp still (inspection / screenshots) while rendering continues.
+    colony.update(frozen ? 0 : dt);
 
     if (view.mode === 'follow') {
       const s = colony.shrimp[view.follow % colony.shrimp.length];

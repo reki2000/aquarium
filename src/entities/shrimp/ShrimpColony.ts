@@ -60,15 +60,12 @@ export class ShrimpColony {
       return null;
     });
     this.source = gltf ? 'gltf' : 'procedural';
-    const proceduralTemplate = gltf ? null : buildProceduralShrimp({ grade: 0.8, saddle: false });
+    const proceduralTemplate = gltf ? null : buildProceduralShrimp({ grade: 0.8 });
 
     for (let i = 0; i < count; i++) {
-      // Mix of grades; larger individuals are females and some carry a saddle.
+      // Mix of grades; females are larger and more intensely colored than males.
       const female = rand() < 0.55;
-      const variant: ShrimpColorVariant = {
-        grade: female ? 0.65 + rand() * 0.35 : 0.2 + rand() * 0.4,
-        saddle: female && rand() < 0.4,
-      };
+      const variant: ShrimpColorVariant = { grade: female ? 0.65 + rand() * 0.35 : 0.2 + rand() * 0.4 };
       const scale = female ? 0.95 + rand() * 0.2 : 0.72 + rand() * 0.15;
       const rig = gltf ? cloneGltfShrimp(gltf) : cloneShrimp(proceduralTemplate!, variant);
 

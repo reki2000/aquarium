@@ -29,11 +29,28 @@ const tag = process.env.SHOT_QUERY ? `-${process.env.SHOT_QUERY.replace(/[^a-z0-
 const shots = [
   { name: `overview${tag}`, query: q },
   { name: `macro${tag}`, query: q, setup: `window.__aqualium.view.follow = 3; window.__aqualium.setMode('follow');` },
+  // Side-on close-up of one shrimp (use with freeze in SHOT_QUERY so it stays in frame).
+  {
+    name: `side${tag}`,
+    query: q,
+    setup: `(() => {
+      const { colony, camera, controls } = window.__aqualium;
+      const o = colony.shrimp[0].object;
+      o.updateMatrixWorld();
+      const side = o.localToWorld(o.position.clone().set(1, 0, 0)).sub(o.getWorldPosition(o.position.clone())).normalize();
+      const p = o.getWorldPosition(o.position.clone());
+      p.y += 0.006;
+      controls.target.copy(p);
+      camera.position.copy(p).addScaledVector(side, 0.075).add({ x: 0, y: 0.012, z: 0 });
+    })()`,
+  },
 ];
 
 const timeout = Number(process.env.SHOT_TIMEOUT ?? 180_000);
+// SHOT_ONLY=side,macro limits which shots are taken.
+const only = process.env.SHOT_ONLY?.split(',');
 try {
-  for (const shot of shots) {
+  for (const shot of shots.filter((s) => !only || only.some((o) => s.name.startsWith(o)))) {
     await page.goto(`${base}${shot.query}`);
     await page.waitForFunction(() => window.__aqualium?.debug?.ready, null, { timeout });
     if (shot.setup) await page.evaluate(shot.setup);
