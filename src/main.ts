@@ -8,6 +8,7 @@ import { createTank } from './scene/tank';
 import { createHardscape } from './scene/hardscape';
 import { setupLighting } from './scene/lighting';
 import { ShrimpColony } from './entities/shrimp/ShrimpColony';
+import { shrimpLook } from './entities/shrimp/shrimpMaterials';
 import { createSuspendedParticles } from './entities/particles';
 import { createPipeline, postParams } from './post/pipeline';
 
@@ -84,6 +85,9 @@ async function main() {
   waterF.add(waterParams.causticStrength, 'value', 0, 1.5).name('caustics');
   waterF.add(waterParams.causticScale, 'value', 0.5, 8).name('caustic scale');
   waterF.add(waterParams.causticSpeed, 'value', 0, 2).name('caustic speed');
+  const shrimpF = gui.addFolder('Shrimp');
+  shrimpF.add(shrimpLook.clarity, 'value', 0, 1.3).name('clarity');
+  shrimpF.add(shrimpLook.pigment, 'value', 0, 2).name('pigment');
   const lightF = gui.addFolder('Light');
   lightF.add(lighting.top, 'intensity', 0, 30).name('top LED');
   lightF.add(lighting.room, 'intensity', 0, 2).name('room');

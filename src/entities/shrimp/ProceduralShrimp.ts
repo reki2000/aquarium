@@ -60,7 +60,7 @@ let shellCache: { carapace: THREE.BufferGeometry; abdomen: THREE.BufferGeometry[
 function shellGeometries() {
   if (shellCache) return shellCache;
   const bodyPivot = centerline(S.pivot);
-  const carapace = loftShell(0, S.carapaceEnd + 0.012, bodyPivot, 1, 1.025);
+  const carapace = loftShell(0, S.carapaceEnd + 0.012, bodyPivot, 1, 1.025, { front: true, back: false });
   const abdomen: THREE.BufferGeometry[] = [];
   for (let i = 0; i < ABDOMEN_SEGMENTS; i++) {
     const s0 = S.abdomen[i];
@@ -68,7 +68,7 @@ function shellGeometries() {
     // Each plate starts slightly inside the previous one and flares at its rear edge.
     abdomen.push(loftShell(s0 - 0.012, s1 + 0.01, centerline(s0), 0.975, 1.025));
   }
-  const telson = loftShell(S.abdomen[ABDOMEN_SEGMENTS] - 0.01, S.telsonEnd, centerline(S.abdomen[ABDOMEN_SEGMENTS]), 0.95, 1);
+  const telson = loftShell(S.abdomen[ABDOMEN_SEGMENTS] - 0.01, S.telsonEnd, centerline(S.abdomen[ABDOMEN_SEGMENTS]), 0.95, 1, { front: false, back: true });
   shellCache = { carapace, abdomen, telson };
   return shellCache;
 }

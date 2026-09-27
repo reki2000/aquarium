@@ -93,9 +93,17 @@ export function bodyHeight(s: number) {
  * `growFront` / `growBack` scale the section at each end so consecutive plates overlap like armor.
  * uv = (s, 1 - t) addresses the unrolled side texture.
  */
-export function loftShell(s0: number, s1: number, pivot: THREE.Vector3, growFront = 1, growBack = 1, rings = 0, radial = 28) {
+export function loftShell(
+  s0: number,
+  s1: number,
+  pivot: THREE.Vector3,
+  growFront = 1,
+  growBack = 1,
+  caps: { front: boolean; back: boolean } = { front: false, back: false },
+  radial = 28,
+) {
   const n = 2.4;
-  const ringCount = rings || Math.max(6, Math.ceil((s1 - s0) * 160));
+  const ringCount = Math.max(6, Math.ceil((s1 - s0) * 160));
   const pos: number[] = [];
   const uv: number[] = [];
   const idx: number[] = [];
@@ -128,8 +136,11 @@ export function loftShell(s0: number, s1: number, pivot: THREE.Vector3, growFron
       idx.push(a, b, cc, b, d, cc);
     }
   }
-  // Close both ends with a fan to a center vertex (hidden by overlaps except at the rostrum / telson tips).
-  for (const [ring, flip] of [[0, true], [ringCount, false]] as const) {
+  // Cap only the outer tips (rostrum / telson): internal caps would show through the translucent shell.
+  const capRings: [number, boolean][] = [];
+  if (caps.front) capRings.push([0, true]);
+  if (caps.back) capRings.push([ringCount, false]);
+  for (const [ring, flip] of capRings) {
     const s = s0 + ((s1 - s0) * ring) / ringCount;
     centerline(s, c);
     const ci = pos.length / 3;
