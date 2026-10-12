@@ -2,6 +2,10 @@
 
 A photorealistic freshwater shrimp (cherry shrimp, *Neocaridina davidi*) aquarium that runs in the browser, built with three.js `WebGPURenderer` and TSL. Falls back to WebGL2 when WebGPU is unavailable.
 
+> **Live demo:** <https://reki2000.github.io/aquarium/>
+>
+> Open the link in a recent Chrome or Edge to see the aquarium running in your browser. Use the GUI in the top-right corner to change the camera, water and lighting, or add URL parameters such as `?quality=medium` on slower machines (see [URL parameters](#url-parameters)).
+
 ![Overview of the tank](docs/images/overview.png)
 
 ## Features
