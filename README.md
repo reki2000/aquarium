@@ -12,6 +12,17 @@ A photorealistic freshwater shrimp (cherry shrimp, *Neocaridina davidi*) aquariu
 - **Post-processing** — GTAO, bloom, TRAA and depth of field, switched by quality tier.
 - **Replaceable model** — drop a glTF at `public/assets/shrimp/cherry.glb` to replace the procedural shrimp.
 
+## Rendering techniques
+
+The scene uses three.js `WebGPURenderer` for real-time rendering through WebGPU, with WebGL2 as a fallback. Materials are built with **TSL (Three.js Shading Language)**: shader nodes describe how light, surface color and procedural noise interact on the GPU.
+
+- **Water and glass:** Beer–Lambert absorption makes light fade and change color according to how far it travels through the water. Scattered light adds a subtle underwater tint, while reflective overlays provide glass and water-surface highlights. Procedural bump mapping gives the surface small ripples.
+- **Rocks, soil and wood:** noise functions generate granules, mineral veins and wood grain. Physically based materials use roughness and surface normals to control how these surfaces catch the light.
+- **Shrimp:** photo-derived shells combine light transmission, colored absorption and approximate subsurface scattering to suggest translucent tissue. Thin appendages use similar materials, with procedural pigment bands.
+- **Finishing effects:** GTAO adds contact shading, bloom softens bright highlights, and TRAA blends information across frames to reduce jagged edges. Depth of field adds camera-focus blur at the high quality tier. Neutral tone mapping converts the lighting into display colors.
+
+The quality tiers adjust shadows, particle counts and optional effects to balance detail with rendering cost. See [the rendering pipeline](src/post/pipeline.ts) and [materials](src/materials/) for the implementation.
+
 ## Getting started
 
 Requires Node.js 20.19+ (or 22.12+) and a browser with WebGPU (recent Chrome / Edge) or WebGL2.
