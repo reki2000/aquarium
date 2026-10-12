@@ -8,10 +8,10 @@ import { WATER_BOX } from '../config';
 /** Live-tunable water optics (bound to the debug GUI). */
 export const waterParams = {
   /** Beer–Lambert absorption per meter (r, g, b). Red dies first → green/teal cast. */
-  absorption: uniform(new THREE.Vector3(2.2, 0.55, 0.75)),
+  absorption: uniform(new THREE.Vector3(0.8, 0.25, 0.35)),
   /** In-scattered light color (tint of suspended matter). */
-  scatterColor: uniform(new THREE.Color(0.03, 0.07, 0.065)),
-  scatterDensity: uniform(1.8),
+  scatterColor: uniform(new THREE.Color(0.08, 0.12, 0.1)),
+  scatterDensity: uniform(0.8),
   causticStrength: uniform(1.0),
   causticScale: uniform(3.2),
   causticSpeed: uniform(0.55),

@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 // Addons import from 'three'; point that at the WebGPU build so the whole app shares one three instance.
 export default defineConfig({
+  base: './',
   resolve: {
     alias: [
       {
@@ -11,5 +12,10 @@ export default defineConfig({
       },
     ],
   },
-  build: { target: 'es2022' },
+  build: {
+    target: 'es2022',
+    outDir: 'docs',
+    // docs also contains checked-in specifications and images.
+    emptyOutDir: false,
+  },
 });

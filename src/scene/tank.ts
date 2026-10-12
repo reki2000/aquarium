@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { TANK } from '../config';
 import { createGlassEdgeMaterial, createGlassMaterial, createWaterSurfaceMaterial } from '../materials/water';
 
-/** Rimless 60cm tank on a cabinet in a dim room. */
+/** Rimless 60cm tank on a cabinet in a bright room. */
 export function createTank(): THREE.Group {
   const group = new THREE.Group();
   group.name = 'tank';
@@ -26,8 +26,8 @@ export function createTank(): THREE.Group {
   pane(G, H, D, W / 2 + G / 2, H / 2, 0, 'x');
   pane(G, H, D, -W / 2 - G / 2, H / 2, 0, 'x');
 
-  // Black backscreen film on the outside of the back pane: hides the room and makes the water read deep.
-  const backscreen = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardNodeMaterial({ color: 0x020303, roughness: 0.9 }));
+  // Pale sage backscreen keeps the shrimp readable against a softly lit backdrop.
+  const backscreen = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardNodeMaterial({ color: 0xb6d0bd, roughness: 0.9 }));
   backscreen.position.set(0, H / 2, -D / 2 - G - 0.0005);
   group.add(backscreen);
 
@@ -52,18 +52,18 @@ export function createTank(): THREE.Group {
   const bottom = new THREE.Mesh(new THREE.BoxGeometry(W + 2 * G, G, D + 2 * G), new THREE.MeshStandardNodeMaterial({ color: 0x0b0d0d, roughness: 0.2 }));
   bottom.position.y = -G / 2;
   group.add(bottom);
-  const cabinetMat = new THREE.MeshStandardNodeMaterial({ color: 0x14100d, roughness: 0.55 });
+  const cabinetMat = new THREE.MeshStandardNodeMaterial({ color: 0xb09573, roughness: 0.55 });
   const cabinet = new THREE.Mesh(new THREE.BoxGeometry(W + 0.03, 0.7, D + 0.06), cabinetMat);
   cabinet.position.set(0, -G - 0.35, 0);
   cabinet.receiveShadow = true;
   group.add(cabinet);
 
-  // Room: back wall + floor, both dark and matte so the lit tank dominates.
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(6, 3), new THREE.MeshStandardNodeMaterial({ color: 0x2a2d31, roughness: 0.95 }));
+  // Soft neutral room colors complement the warm aquarium lighting.
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(6, 3), new THREE.MeshStandardNodeMaterial({ color: 0xe2e8df, roughness: 0.95 }));
   wall.position.set(0, 0.6, -D / 2 - 0.25);
   wall.receiveShadow = true;
   group.add(wall);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.MeshStandardNodeMaterial({ color: 0x1c1712, roughness: 0.7 }));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.MeshStandardNodeMaterial({ color: 0xc9b89d, roughness: 0.7 }));
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -G - 0.7;
   group.add(floor);

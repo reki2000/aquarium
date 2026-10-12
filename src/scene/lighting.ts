@@ -9,14 +9,14 @@ export interface Lighting {
 }
 
 export function setupLighting(scene: THREE.Scene, renderer: THREE.WebGPURenderer, quality: QualitySettings): Lighting {
-  // Dim room reflections for glass / wet surfaces.
+  // Bright room reflections for glass and wet surfaces.
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.12;
-  scene.background = new THREE.Color(0x06080a);
+  scene.environmentIntensity = 0.45;
+  scene.background = new THREE.Color(0xe8eee9);
 
-  // Aquarium LED: a wide cool-white spot above the tank projecting animated caustics.
-  const top = new THREE.SpotLight(0xf1f5ff, 4.5, 0, 0.52, 0.6, 1.2);
+  // Aquarium LED: a wide warm-white spot above the tank projecting animated caustics.
+  const top = new THREE.SpotLight(0xfff4e4, 6.5, 0, 0.52, 0.6, 1.2);
   top.position.set(0, TANK.height + 0.42, 0.02);
   top.target.position.set(0, 0, 0);
   top.castShadow = true;
@@ -30,7 +30,7 @@ export function setupLighting(scene: THREE.Scene, renderer: THREE.WebGPURenderer
   (top as unknown as { colorNode: unknown }).colorNode = causticLightColor;
   scene.add(top, top.target);
 
-  const room = new THREE.HemisphereLight(0x9aa6b8, 0x1a140f, 0.25);
+  const room = new THREE.HemisphereLight(0xfff8ed, 0xc0ab8b, 1.1);
   scene.add(room);
 
   return { top, room };

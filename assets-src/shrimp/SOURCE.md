@@ -5,6 +5,8 @@
 - Source: https://commons.wikimedia.org/wiki/File:Neocaridina_heteropoda_female.png
 - Author: Pedro Doria Meunier
 - License: Public domain
+- Verified: 2026-10-12. The source page records the author's worldwide public-domain dedication and fallback permission to use the work for any purpose without conditions (except those required by law).
+- Original SHA-1: `2f39786f8764c0f5d294c48a3bbf346f4a9688e2` (matches the local file).
 
 Used by `tools/shrimp-profile/extract.mjs` to derive:
 

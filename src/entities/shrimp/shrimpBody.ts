@@ -20,8 +20,8 @@ export const S = {
   pivot: 0.3,
 };
 
-/** Walking legs lift the carapace underside this far above the ground (fraction of length, from the photo). */
-const CLEARANCE = 0.127;
+/** Walking legs lift the carapace underside this far above the ground (fraction of body length). */
+const CLEARANCE = 0.15;
 
 const samples = profileData.samples;
 
@@ -30,9 +30,12 @@ function sampleProfile(s: number) {
   const i0 = Math.floor(f);
   const i1 = Math.min(samples.length - 1, i0 + 1);
   const k = f - i0;
+  // Slim the abdomen smoothly, keeping the carapace join and flat tail fan continuous.
+  const abdomen = THREE.MathUtils.smoothstep(s, S.carapaceEnd, 0.5)
+    * (1 - THREE.MathUtils.smoothstep(s, 0.84, 0.94));
   return {
     center: samples[i0].center * (1 - k) + samples[i1].center * k,
-    height: samples[i0].height * (1 - k) + samples[i1].height * k,
+    height: (samples[i0].height * (1 - k) + samples[i1].height * k) * (1 - 0.16 * abdomen) * 0.8,
   };
 }
 

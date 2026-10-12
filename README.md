@@ -19,8 +19,16 @@ Requires Node.js 20.19+ (or 22.12+) and a browser with WebGPU (recent Chrome / E
 ```sh
 npm install
 npm run dev          # http://localhost:5173
-npm run build        # type-check + production build
+npm run build        # type-check + production build into docs/
 ```
+
+## GitHub Pages
+
+Run `npm run build` and commit the generated files in `docs/` along with your changes, then push to `main`.
+
+In the repository's **Settings → Pages**, select **Deploy from a branch**, branch **main**, and folder **/docs**. GitHub Pages publishes `docs/` directly whenever `main` is updated.
+
+Build assets use relative URLs so they work under the repository's GitHub Pages path. Existing specifications and images in `docs/` are preserved during builds.
 
 ## URL parameters
 
@@ -53,13 +61,22 @@ SHOT_QUERY="backend=webgl&quality=medium" CHROME_PATH=<chromium> npm run shot --
 | `src/entities/shrimp/` | Shrimp geometry, materials, rig, animation and behavior |
 | `src/post/` | Post-processing pipeline |
 | `tools/shrimp-profile/` | Extracts the body profile and side texture from the reference photo |
-| `scripts/` | Screenshot and asset helper scripts |
-| `docs/` | Implementation plan and model spec |
+| `scripts/` | Screenshot verification |
+| `docs/` | Production build, implementation plan and model spec |
 
 ## Credits
 
 - Reference photo of *Neocaridina heteropoda* by Pedro Doria Meunier, [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Neocaridina_heteropoda_female.png), public domain. See [assets-src/shrimp/SOURCE.md](assets-src/shrimp/SOURCE.md).
+- three.js and its addons — MIT, copyright © 2010–2026 three.js authors.
+- lil-gui — MIT, copyright © 2019 George Michael Brower.
+- meshoptimizer / MeshoptDecoder — MIT, copyright © 2016–2026 Arseny Kapoulkine.
+- MaterialX noise included in three.js — Apache-2.0, Academy Software Foundation project.
+- Vite modulepreload polyfill — MIT, copyright © 2019–present VoidZero Inc. and Vite contributors.
+
+Full license texts are included in [public/THIRD-PARTY-LICENSES.txt](public/THIRD-PARTY-LICENSES.txt) and copied into the published `docs/` directory. The site's **Licenses & credits** link opens these notices.
+
+**Unresolved permission:** the caustic pattern in `src/materials/water.ts` identifies joltz0r / Dave_Hoskins as its source, but the original license has not been verified. Attribution alone does not establish permission to redistribute that implementation under MIT. See [docs/license-review.md](docs/license-review.md).
 
 ## License
 
-[MIT](LICENSE)
+Project code is licensed under [MIT](LICENSE). Third-party components retain their own licenses; the published site includes [THIRD-PARTY-LICENSES.txt](public/THIRD-PARTY-LICENSES.txt). See [the license review](docs/license-review.md) for asset provenance and the unresolved caustic shader permission.

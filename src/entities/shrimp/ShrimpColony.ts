@@ -3,7 +3,7 @@ import type { Terrain } from '../../sim/terrain';
 import { mulberry32 } from '../../util/noise';
 import { JointSet } from './joints';
 import { buildProceduralShrimp, cloneShrimp, type ShrimpRigTemplate } from './ProceduralShrimp';
-import { cloneGltfShrimp, tryLoadGltfShrimp, type GltfShrimpTemplate } from './GltfShrimp';
+import { cloneGltfShrimp, tryLoadGltfShrimp } from './GltfShrimp';
 import { ShrimpBrain } from './ShrimpBrain';
 import { ShrimpRig } from './ShrimpRig';
 import type { ShrimpColorVariant } from './shrimpMaterials';
@@ -55,7 +55,7 @@ export class ShrimpColony {
 
   async spawn(count: number, seed = 42) {
     const rand = mulberry32(seed);
-    const gltf: GltfShrimpTemplate | null = await tryLoadGltfShrimp().catch((e) => {
+    const gltf = await tryLoadGltfShrimp().catch((e) => {
       console.warn('[shrimp] failed to load glTF model, using procedural placeholder', e);
       return null;
     });

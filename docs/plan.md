@@ -1,48 +1,48 @@
-# 実装計画
+# Implementation plan
 
-## 決定事項（2026-09-26）
+## Decisions (2026-09-26)
 
-| 項目 | 決定 |
+| Item | Decision |
 |---|---|
-| 主役 | チェリーシュリンプ（Neocaridina davidi） |
-| ターゲット | デスクトップ優先（WebGPU、WebGL2 フォールバック。モバイルは低品質ティアで動けば可） |
-| 用途 | 鑑賞用（オービット／マクロ追従カメラ） |
-| エビモデル | ユーザーが glb を用意 → `docs/shrimp-model-spec.md` の仕様で差し込み。届くまでは手続き生成のプレースホルダー |
+| Main subject | Cherry shrimp (*Neocaridina davidi*) |
+| Target | Desktop first: WebGPU with a WebGL2 fallback. Mobile support at the low quality tier is optional. |
+| Purpose | Aquarium viewing with orbit and macro follow cameras |
+| Shrimp model | A user-supplied GLB can replace the procedural model using [the model specification](shrimp-model-spec.md). |
 
-## 技術スタック
+## Technology
 
-- three.js r186 `WebGPURenderer` + TSL（`three` は Vite で WebGPU ビルドにエイリアス）
-- Vite + TypeScript、lil-gui
-- 外部アセットゼロで動く（手続きテクスチャ・手続きジオメトリ）。差し替え可能なアセットは `public/assets/`
+- three.js r186 `WebGPURenderer` and TSL; Vite aliases `three` to the WebGPU build.
+- Vite, TypeScript and lil-gui.
+- Procedural textures and geometry for the aquarium. The shrimp uses a texture derived from a public-domain reference photograph. Replaceable assets live in `public/assets/`.
 
-## 表現の要点と実装箇所
+## Rendering techniques
 
-| 要素 | 手法 | 場所 |
+| Element | Technique | Location |
 |---|---|---|
-| 水の色・濁り | カメラ→フラグメントの光線が水の直方体内を通る距離で Beer–Lambert 減衰＋散乱（`scene.fogNode`） | `src/materials/water.ts` |
-| コースティクス | 上面 SpotLight の `colorNode` に TSL の手続きコースティクス（RGB を少しずらして分散） — 影付き | `src/materials/water.ts`, `src/scene/lighting.ts` |
-| ガラス・水面 | transmission を使わない反射専用オーバーレイ（加算＋わずかな減衰）。ガラス端面は緑 | `src/materials/water.ts`, `src/scene/tank.ts` |
-| ソイル・石・流木 | TSL 手続きマテリアル（Worley 粒、石目、木目）＋手続きジオメトリ | `src/materials/hardscape.ts`, `src/scene/hardscape.ts` |
-| 浮遊物 | インスタンス化したスプライトを TSL でドリフト | `src/entities/particles.ts` |
-| エビ | 実写の側面写真から抽出した輪郭で体節ごとに殻をロフトし、写真を (s, t) 展開テクスチャとして貼る（`tools/shrimp-profile/`）。剛体節の階層（外骨格なのでスキン不要）、SSS マテリアル、手続きアニメーション、行動ステートマシン | `src/entities/shrimp/` |
-| ポスト | GTAO → Bloom → TRAA → DOF（品質ティアで切り替え） | `src/post/pipeline.ts` |
+| Water color and turbidity | Beer–Lambert attenuation and scattering based on the camera ray's distance through the water box (`scene.fogNode`) | `src/materials/water.ts` |
+| Caustics | Procedural TSL caustics on the top SpotLight's `colorNode`, with small RGB offsets for dispersion and shadows | `src/materials/water.ts`, `src/scene/lighting.ts` |
+| Glass and water surface | Reflection overlays with additive light and slight attenuation, without transmission passes; green glass edges | `src/materials/water.ts`, `src/scene/tank.ts` |
+| Soil, rocks and driftwood | Procedural TSL materials (Worley granules, stone and wood grain) and procedural geometry | `src/materials/hardscape.ts`, `src/scene/hardscape.ts` |
+| Suspended particles | Instanced sprites drifting with TSL | `src/entities/particles.ts` |
+| Shrimp | Segment shells lofted from a photographic side profile, with an unrolled (s, t) texture (`tools/shrimp-profile/`), rigid segment hierarchy, SSS materials, procedural animation and a behavior state machine | `src/entities/shrimp/` |
+| Post-processing | GTAO → Bloom → TRAA → DOF, selected by quality tier | `src/post/pipeline.ts` |
 
-## フェーズ
+## Phases
 
-| # | 内容 | 状態 |
+| # | Work | Status |
 |---|---|---|
-| 0 | 土台（Vite/TS/three WebGPU、GUI、品質ティア、スクリーンショット検証スクリプト） | ✅ |
-| 1 | 水槽と光（ガラス、水中の減衰、水面、コースティクス、照明、ポスト） | ✅ 初版 |
-| 2 | レイアウト（ソイル、石組み、流木） | ✅ 初版（手続き） |
-| 3 | 水草（ウィローモス、アヌビアス・ナナ、有茎草、揺れシェーダー） | 次 |
-| 4 | エビ（静的な見た目） | ✅ 写真（パブリックドメイン）の輪郭から体節ロフト＋展開テクスチャ / glb 差し替えも可 |
-| 5 | リグとアニメーション（歩脚 IK で接地、石の上を歩く） | 🔶 FK 版のみ |
-| 6 | 行動 AI（付着物マップ、脱皮殻、群れ密度） | 🔶 基本ステートマシン |
-| 7 | 仕上げ（気泡、ゴッドレイ、水面下の全反射、HDRI の部屋） | 未 |
-| 8 | 最適化（エビのドローコール統合、LOD、パストレーサー静止画モード） | 未 |
+| 0 | Foundation: Vite, TypeScript, three.js WebGPU, GUI, quality tiers and screenshot verification | Complete |
+| 1 | Tank and lighting: glass, underwater attenuation, water surface, caustics and post-processing | First version complete |
+| 2 | Layout: soil, rocks and driftwood | First procedural version complete |
+| 3 | Plants: willow moss, Anubias nana, stem plants and swaying shaders | Next |
+| 4 | Shrimp appearance | Photo-derived segment lofts and unrolled texture complete; optional GLB replacement supported |
+| 5 | Rig and animation: foot contact and walking on rocks | Basic foot-target IK implemented; walking on rocks remains pending |
+| 6 | Behavior: food maps, molts and colony density | Basic state machine implemented |
+| 7 | Finishing: bubbles, light shafts, underwater total internal reflection and an HDRI room | Pending |
+| 8 | Optimization: merged shrimp draw calls, LOD and path-traced still images | Pending |
 
-## 既知の課題
+## Known issues
 
-- 手続き生成のエビは1匹あたり約 80 メッシュ（14匹で約 1,100 ドローコール＋影）。glb 移行時に 1 SkinnedMesh になる予定
-- ヘッドレス Chromium（SwiftShader）では WebGPU キャンバスがスクリーンショットに写らないため、自動検証は `backend=webgl` で行う
-- 石・流木の上はエビが歩けない（障害物扱い）→ フェーズ 5 で高さ場を統合
+- Each procedural shrimp has approximately 80 meshes: roughly 1,100 draw calls for 14 shrimp, plus shadows. A future GLB model could use one SkinnedMesh.
+- Headless Chromium with SwiftShader may omit WebGPU canvases from screenshots, so automated checks use `backend=webgl`.
+- Shrimp cannot walk on rocks or driftwood, which currently act as obstacles. Integrating their surfaces into the terrain remains pending.

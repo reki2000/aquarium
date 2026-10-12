@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aqualium</title>
+    <style>html,body{background:#e8eee9;height:100%;margin:0;overflow:hidden}canvas{display:block}#status{color:#40564f;pointer-events:none;font:12px/1.4 system-ui,sans-serif;position:fixed;bottom:10px;left:12px}#licenses{color:#40564f;font:12px/1.4 system-ui,sans-serif;position:fixed;bottom:10px;right:12px}#loading{z-index:2000;color:#253d38;text-align:center;background:#e8eee9;place-items:center;font:16px/1.6 system-ui,sans-serif;display:grid;position:fixed;inset:0}#loading[hidden]{display:none}#loading .panel{padding:24px}#loading h1{margin:12px 0;font-size:24px}#loading-message{margin:0}#loading-hint{color:#637b72;font-size:13px}#loading-spinner{border:3px solid #c7d8d1;border-top-color:#327d6b;border-radius:50%;width:28px;height:28px;animation:1s linear infinite spin;display:inline-block}#loading-spinner[hidden]{display:none}#loading-retry{color:#dce9ec;font:inherit;cursor:pointer;background:#16332e;border:1px solid #8cd8cb;border-radius:6px;padding:8px 18px}@keyframes spin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){#loading-spinner{animation:none}}</style>
+    <script type="module" crossorigin src="./assets/index-DNXSEO4h.js"></script>
+  </head>
+  <body>
+    <div id="loading" role="status" aria-live="polite" aria-atomic="true">
+      <div class="panel">
+        <span id="loading-spinner" aria-hidden="true"></span>
+        <h1 id="loading-title">Preparing your aquarium</h1>
+        <p id="loading-message">Loading the app…</p>
+        <p id="loading-hint">The first launch may take a little longer.</p>
+        <button id="loading-retry" type="button" hidden>Reload</button>
+      </div>
+    </div>
+    <div id="status"></div>
+    <a id="licenses" href="./THIRD-PARTY-LICENSES.txt" target="_blank" rel="noopener">Licenses &amp; credits</a>
+  </body>
+</html>

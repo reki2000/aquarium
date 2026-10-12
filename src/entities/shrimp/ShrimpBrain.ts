@@ -41,7 +41,7 @@ export class ShrimpBrain {
         this.microStep -= dt;
         if (this.microStep < -1.5 - this.rand() * 3) this.microStep = 0.3 + this.rand() * 0.4;
         if (this.microStep > 0) {
-          desiredSpeed = 0.004;
+          desiredSpeed = 0.0015;
           desiredHeading = this.heading + (this.rand() - 0.5) * 0.6;
         }
         if (this.timer <= 0) this.chooseNext();
@@ -55,7 +55,7 @@ export class ShrimpBrain {
         const dz = this.targetZ - this.z;
         const dist = Math.hypot(dx, dz);
         desiredHeading = Math.atan2(dx, dz);
-        desiredSpeed = 0.011 * smoothstep(0.002, 0.02, dist);
+        desiredSpeed = 0.0038 * smoothstep(0.002, 0.02, dist);
         if (dist < 0.004 || this.timer <= 0) this.begin('graze', 4 + this.rand() * 8);
         break;
       }
@@ -107,13 +107,13 @@ export class ShrimpBrain {
     }
 
     // Turn with a limited yaw rate; slow down for sharp turns.
-    const maxTurn = this.activity === 'swim' ? 3.5 : 2.2;
+    const maxTurn = this.activity === 'swim' ? 3.5 : 0.9;
     let dh = Math.atan2(Math.sin(desiredHeading - this.heading), Math.cos(desiredHeading - this.heading));
     dh = clamp(dh, -maxTurn * dt, maxTurn * dt);
     this.heading += dh;
     this.turnRate = dh / Math.max(dt, 1e-4);
     const turnSlow = 1 - clamp(Math.abs(dh / (maxTurn * dt + 1e-6)) * 0.6, 0, 0.6);
-    this.speed += (desiredSpeed * turnSlow - this.speed) * Math.min(1, dt * 5);
+    this.speed += (desiredSpeed * turnSlow - this.speed) * Math.min(1, dt * (this.activity === 'swim' ? 5 : 2));
 
     const nx = this.x + Math.sin(this.heading) * this.speed * dt;
     const nz = this.z + Math.cos(this.heading) * this.speed * dt;
@@ -131,7 +131,7 @@ export class ShrimpBrain {
   private chooseNext() {
     const r = this.rand();
     if (r < 0.55) {
-      this.begin('walk', 12);
+      this.begin('walk', 24);
       this.pickTarget(0.03, 0.12);
     } else if (r < 0.72) {
       this.begin('graze', 3 + this.rand() * 8);

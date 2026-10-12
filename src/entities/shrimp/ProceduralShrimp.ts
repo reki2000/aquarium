@@ -160,15 +160,16 @@ export function buildProceduralShrimp(variant: ShrimpColorVariant): ShrimpRigTem
   }
 
   // --- Pereiopods: pairs 1–2 are small chelipeds, 3–5 walking legs ---------------------------
-  // Attach along the carapace underside; walking legs are scaled so their tips reach the ground.
-  const legS = [0.16, 0.2, 0.25, 0.3, 0.35];
+  // Cluster roots along the lower flanks of the head/thorax, behind the mouth.
+  // The upper segment opens outward; the longer lower segment folds toward the substrate.
+  const legS = [0.22, 0.255, 0.29, 0.33, 0.365];
   const splay = [1.1, 0.75, 0.35, -0.15, -0.55];
   const baseLen = [
     [0.0019, 0.0016, 0.0007],
     [0.0021, 0.0018, 0.0008],
-    [0.0031, 0.0019, 0.0008],
-    [0.0033, 0.002, 0.0008],
-    [0.0033, 0.002, 0.0008],
+    [0.0023, 0.003, 0.0009],
+    [0.0025, 0.0032, 0.0009],
+    [0.0025, 0.0032, 0.0009],
   ];
   const segRad = [0.0002, 0.00016, 0.0001];
   for (let pair = 1; pair <= LEG_PAIRS; pair++) {
@@ -178,11 +179,11 @@ export function buildProceduralShrimp(variant: ShrimpColorVariant): ShrimpRigTem
       const cheliped = pair <= 2;
       const dirs = (
         cheliped
-          ? [new THREE.Vector3(sx * 0.55, -0.75, 1.0), new THREE.Vector3(sx * 0.1, -0.7, 0.9), new THREE.Vector3(sx * 0.05, -0.3, 1.0)]
-          : [new THREE.Vector3(sx * 1.0, -0.55, f), new THREE.Vector3(sx * 0.35, -1.0, f * 0.5), new THREE.Vector3(sx * 0.1, -1.0, f * 0.25)]
+          ? [new THREE.Vector3(sx * 0.65, -0.15, 1.0), new THREE.Vector3(sx * 0.15, -0.85, 0.45), new THREE.Vector3(sx * 0.05, -0.3, 1.0)]
+          : [new THREE.Vector3(sx * 1.0, 0.08, f), new THREE.Vector3(sx * 0.12, -1.0, f * 0.5), new THREE.Vector3(-sx * 0.2, -0.9, f * 0.25)]
       ).map((d) => d.normalize());
-      const start = bodyPoint(legS[pair - 1], 0.92, sx * 0.5);
-      let lens = baseLen[pair - 1];
+      const start = bodyPoint(legS[pair - 1], 0.78, sx * 0.9);
+      let lens = baseLen[pair - 1].map((len) => len * (cheliped ? 1.2 : 1));
       if (!cheliped) {
         // Scale so the tip lands just below y = 0 (pressed into the substrate slightly).
         const drop = lens.reduce((acc, len, i) => acc - dirs[i].y * len, 0);
@@ -199,6 +200,7 @@ export function buildProceduralShrimp(variant: ShrimpColorVariant): ShrimpRigTem
         p = j;
         at = at.clone().addScaledVector(dirs[i - 1], len);
       }
+      if (!cheliped) addJoint(jointName.legTip(pair, s), p, at);
     }
   }
 

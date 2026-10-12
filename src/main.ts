@@ -17,19 +17,34 @@ const tier = (params.get('quality') as QualityTier) ?? 'high';
 const quality = QUALITY[tier] ?? QUALITY.high;
 const status = document.getElementById('status')!;
 const frozen = params.has('freeze');
+const loading = document.getElementById('loading')!;
+const loadingMessage = document.getElementById('loading-message')!;
+const loadingRetry = document.getElementById('loading-retry')!;
+loadingRetry.addEventListener('click', () => location.reload());
+
+// Give the browser a paint between expensive startup steps so their labels are visible.
+const paintLoading = () => new Promise<void>((resolve) => {
+  requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+});
+async function loadingStage(message: string) {
+  loadingMessage.textContent = message;
+  await paintLoading();
+}
 
 async function main() {
+  await loadingStage('Preparing the renderer…');
   const renderer = new THREE.WebGPURenderer({ antialias: false, forceWebGL: params.get('backend') === 'webgl' });
   renderer.setPixelRatio(quality.pixelRatio);
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.35;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   document.body.appendChild(renderer.domElement);
   await renderer.init();
   const backend = (renderer.backend as { isWebGPUBackend?: boolean }).isWebGPUBackend ? 'WebGPU' : 'WebGL2';
 
+  await loadingStage('Building the tank, substrate, rocks and driftwood…');
   const scene = new THREE.Scene();
   scene.fogNode = underwaterFog();
 
@@ -45,13 +60,16 @@ async function main() {
   const terrain = new Terrain();
   scene.add(createTank());
   scene.add(createHardscape(terrain));
+  await loadingStage('Preparing the lighting…');
   const lighting = setupLighting(scene, renderer, quality);
   scene.add(createSuspendedParticles(quality.particles));
 
+  await loadingStage('Preparing the shrimp models and textures…');
   const colony = new ShrimpColony(terrain);
   await colony.spawn(Number(params.get('shrimp') ?? SHRIMP_COUNT));
   scene.add(colony.group);
 
+  await loadingStage('Preparing the water and visual effects…');
   // ?post=off renders the scene directly (debugging / very old GPUs).
   const pipeline = params.get('post') === 'off' ? null : createPipeline(renderer, scene, camera, quality);
 
@@ -93,7 +111,7 @@ async function main() {
   lightF.add(lighting.room, 'intensity', 0, 2).name('room');
   lightF.add(renderer, 'toneMappingExposure', 0.2, 3).name('exposure');
   lightF.add(postParams.aoStrength, 'value', 0, 1).name('AO');
-  gui.close();
+  gui.open();
 
   const onResize = () => {
     camera.aspect = innerWidth / innerHeight;
@@ -108,6 +126,15 @@ async function main() {
   let fpsTime = 0;
   const debug = { frames: 0, ready: false };
   (window as unknown as { __aqualium: unknown }).__aqualium = { debug, colony, camera, controls, setMode, view };
+
+  await loadingStage('Rendering the first frame…');
+  colony.update(0);
+  controls.update(0);
+  if (view.autoFocus) postParams.focusDistance.value = camera.position.distanceTo(controls.target);
+  if (pipeline) pipeline.render();
+  else renderer.render(scene, camera);
+  await paintLoading();
+  loading.hidden = true;
 
   renderer.setAnimationLoop((timestamp) => {
     clock.update(timestamp);
@@ -145,5 +172,13 @@ async function main() {
 
 main().catch((e) => {
   console.error(e);
-  status.textContent = `Failed to start: ${e instanceof Error ? e.message : String(e)}`;
+  const message = e instanceof Error ? e.message : String(e);
+  loading.hidden = false;
+  loading.setAttribute('role', 'alert');
+  document.getElementById('loading-title')!.textContent = 'Unable to start the aquarium';
+  loadingMessage.textContent = message;
+  document.getElementById('loading-spinner')!.hidden = true;
+  document.getElementById('loading-hint')!.hidden = true;
+  loadingRetry.hidden = false;
+  status.textContent = `Failed to start: ${message}`;
 });

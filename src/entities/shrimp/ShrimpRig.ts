@@ -1,7 +1,7 @@
 import {
   ABDOMEN_SEGMENTS, ANTENNA_SEGMENTS, ANTENNULE_SEGMENTS, JointSet, LEG_PAIRS, PLEOPOD_PAIRS, SIDES, jointName,
 } from './joints';
-import { clamp } from '../../util/noise';
+import { clamp, smoothstep } from '../../util/noise';
 
 export interface LocomotionState {
   /** Ground speed (m/s). */
@@ -32,7 +32,7 @@ export class ShrimpRig {
     this.t += dt;
     const t = this.t;
     const stride = 0.0032 * this.scale;
-    const walk = clamp(s.speed / 0.008, 0, 1) * (1 - s.swim);
+    const walk = clamp(s.speed / 0.004, 0, 1) * (1 - s.swim);
     this.gait += (s.speed / stride) * TAU * dt * (1 - s.swim);
     this.smoothTurn += (s.turnRate - this.smoothTurn) * Math.min(1, dt * 4);
     // Pleopods fan gently all the time; beat hard while swimming.
@@ -69,22 +69,34 @@ export class ShrimpRig {
 
       for (let pair = 1; pair <= LEG_PAIRS; pair++) {
         if (pair <= 2) {
-          // Chelipeds: alternating rapid picking (~1.2 Hz per claw) while grazing, held forward otherwise.
-          const pick = 0.5 + 0.5 * Math.sin(t * 7.5 + anti + pair * 1.3 + this.seed);
-          const g = s.graze * (1 - s.swim);
-          j.set(jointName.leg(pair, side, 1), g * (0.2 + 0.45 * pick) - s.swim * 0.5, sx * 0.08 * Math.sin(t * 2.3 + pair));
-          j.set(jointName.leg(pair, side, 2), -g * 0.7 * pick);
-          j.set(jointName.leg(pair, side, 3), g * 0.3 * (1 - pick));
+          // Search with all four chelipeds even while walking; feed more actively when grazing.
+          const reach = 0.5 + 0.5 * Math.sin(t * 3.3 + anti + pair * 1.3 + this.seed);
+          const g = (0.35 + 0.65 * s.graze) * (1 - s.swim);
+          j.set(jointName.leg(pair, side, 1), g * (0.12 + 0.65 * reach) - s.swim * 0.5, sx * g * 0.18 * Math.sin(t * 1.7 + pair + this.seed));
+          j.set(jointName.leg(pair, side, 2), -g * 0.95 * reach);
+          j.set(jointName.leg(pair, side, 3), g * 0.45 * (1 - reach));
           continue;
         }
-        // Walking legs: neighbours and contralateral legs out of phase.
-        const ph = this.gait + pair * 2.1 + anti;
-        const swing = Math.sin(ph) * 0.38 * walk;
-        const lift = Math.max(0, Math.cos(ph)) * 0.32 * walk;
-        const idle = 0.03 * Math.sin(t * 0.7 + pair + anti) * (1 - walk);
+        // Keep the foot's lateral position fixed: lift by bending both joints,
+        // carry the folded leg forward, then extend it for the planted stroke.
+        const phase = ((this.gait + pair * 2.1 + anti) % TAU) / TAU;
+        const stance = 0.65;
+        let sweep: number;
+        let fold = 0;
+        if (phase < stance) {
+          sweep = 0.3 * (1 - 2 * phase / stance);
+        } else {
+          const swing = (phase - stance) / (1 - stance);
+          fold = smoothstep(0, 0.2, swing) * (1 - smoothstep(0.75, 1, swing));
+          sweep = -0.3 + 0.6 * smoothstep(0.2, 0.75, swing);
+        }
+        fold *= walk;
         const tuck = s.swim;
-        j.set(jointName.leg(pair, side, 1), 0, -sx * (swing + idle) + sx * 0.55 * tuck, sx * (lift + 0.35 * tuck));
-        j.set(jointName.leg(pair, side, 2), 0, 0, sx * (lift * 0.5 + 0.25 * tuck));
+        if (tuck < 0.001 && j.setLegFoot(pair, side, 0.0015 * fold, 0.001 * sweep / 0.3 * walk)) continue;
+        // Models without optional foot markers retain the joint-angle fallback.
+        j.set(jointName.leg(pair, side, 1), 0, -sx * sweep * walk + sx * 0.7 * tuck, sx * (0.1 * fold + 0.45 * tuck));
+        j.set(jointName.leg(pair, side, 2), 0, 0, sx * (-0.7 * fold + 0.4 * tuck));
+        j.set(jointName.leg(pair, side, 3), 0, 0, sx * 0.4 * fold);
       }
 
       for (let pair = 1; pair <= PLEOPOD_PAIRS; pair++) {
