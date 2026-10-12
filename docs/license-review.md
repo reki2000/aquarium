@@ -10,7 +10,7 @@ This review covers repository images, models and shaders, and the main third-par
 | `public/assets/shrimp/cherry-side.png` / `docs/assets/shrimp/cherry-side.png` | Texture generated from that photograph by `tools/shrimp-profile/extract.mjs`. No modification or redistribution restrictions were found in the original photograph's permission statement. |
 | `src/entities/shrimp/cherryProfile.json` / procedural shrimp | Uses the outline extracted from that photograph and this project's geometry code. |
 | Rocks, driftwood, substrate and environment lighting | Generated procedurally. Environment lighting uses three.js `RoomEnvironment`, without external HDR photographs. |
-| `docs/images/overview.png` | Its content and addition history indicate an app screenshot. The original capture record is unavailable. The unresolved shader permission below may also affect this image. |
+| `docs/images/overview.png` | App screenshot captured on 2026-10-12 using `scripts/screenshot.mjs` at 1280 × 720 with `backend=webgl&quality=medium`, 14 shrimp and the controls open. The unresolved shader permission below may also affect this image. |
 | `public/assets/shrimp/cherry.glb` | Not currently present. The glTF loading feature remains, but no external model is bundled. |
 
 ## Unresolved permission: caustic shader
